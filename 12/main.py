@@ -1,47 +1,46 @@
 import math
 
-def line_intersection(line1, line2):
-  xdiff = (line1[0][0] - line1[1][0], line2[0][0] -       line2[1][0])
-  ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1]) #Typo was here
+def segmentIntersection(A, B, C, D, P):
+  return ( min(A[0], B[0]) <= P[0] and P[0] <= max(A[0], B[0]) ) and \
+         ( min(A[1], B[1]) <= P[1] and P[1] <= max(A[1], B[1]) ) and \
+         ( min(C[0], D[0]) <= P[0] and P[0] <= max(C[0], D[0]) ) and \
+         ( min(C[1], D[1]) <= P[1] and P[1] <= max(C[1], D[1]) )
 
-  def det(a, b):
-      return a[0] * b[1] - a[1] * b[0]
+def lineIntersection(x1, y1, x2, y2, x3, y3, x4, y4):
+  # is parallel
+  if (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) == 0:
+    return None, None
 
-  div = det(xdiff, ydiff)
-  if div == 0:
-     raise Exception('lines do not intersect')
+  px = ( (x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4) ) / ( (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) )
+  py = ( (x1*y2-y1*x2)*(y3-y4)-(x1-y2)*(x3*y4-y3*x4) ) / ( (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) )
 
-  d = (det(*line1), det(*line2))
-  x = det(d, xdiff) / div
-  y = det(d, ydiff) / div
-  return x, y
+  # segment intersection
+  if not segmentIntersection( (x1, y1), (x2, y2), (x3, y3), (x4, y4), (px, py) ):
+    return None, None
 
-"""
-#input x0, y0, x1, y1, x2, y2, x3, y3, h
-x0, y0, x1, y1, x2, y2, x3, y3, h = input().split(' ')
-x0 = int(x0)
-y0 = int(y0)
-x1 = int(x1)
-y1 = int(y1)
-x2 = int(x2)
-y2 = int(y2)
-x3 = int(x3)
-y3 = int(y3)
-h = int(h)
-"""
+  return px, py
 
-x0 = 1
-y0 = 1
-x1 = 6
-y1 = 1
-x2 = 4
-y2 = 0
-x3 = 4
-y3 = 5
-h = 6
+def lineLength(x1, y1, x2, y2):
+  return math.sqrt( (abs(x1 - x2)) ** 2 + (abs(y1 - y2)) ** 2 )
 
-radius = math.sqrt( (abs(x0-x1)) ** 2 + (abs(y0-y1)) ** 2 )
+""" Введення даних """
+x0, y0, x1, y1, x2, y2, x3, y3, h = map(int, input().split())
 
-xP, yP = line_intersection((x0, y0), (x1, y1))
+""" Знаходження точки перетину """
 
-print(xP, yP)
+x, y = lineIntersection(x0, y0, x1, y1, x2, y2, x3, y3)
+if (x == None and y == None):
+  print(0.000)
+  exit(1)
+
+""" Знаходження радіусу (довжини римської I) """
+radius = lineLength(x0, y0, x1, y1)
+
+""" Знаходження довжини першого катета """
+firsCatet = lineLength(x0, y0, x, y)
+
+""" Знаходження другого катета """
+secondCatet = math.sqrt( radius ** 2 - firsCatet ** 2 )
+
+""" Довжина розриву """
+print( "%.3f" % min(secondCatet, h) )
